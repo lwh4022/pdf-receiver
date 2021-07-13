@@ -1,7 +1,4 @@
-FROM openjdk:8
-
-RUN mkdir /home/server
-WORKDIR /home/server
+FROM openjdk:8 AS builder
 
 COPY gradlew .
 COPY gradle gradle
@@ -13,10 +10,14 @@ RUN chmod +x ./gradlew
 RUN ./gradlew bootJar
 
 FROM openjdk:8
-COPY --from=builder build/libs/*.jar app.jar
-COPY pdf-receiver.json .
 
-RUN export GOOGLE_APPLICATION_CREDENTIALS=./pdf-receiver.json
+ARG JAR_PATH=/home/app.jar
+COPY --from=builder build/libs/*.jar ${JAR_PATH}
+
+ARG KEY_FILE_PATH=pdf-receiver.json
+COPY ${KEY_FILE_PATH} ${KEY_FILE_PATH}
+
+ENV GOOGLE_APPLICATION_CREDENTIALS=${KEY_FILE_PATH}
 
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "/app.jar"]
+ENTRYPOINT ["java", "-jar", "/home/app.jar"]
