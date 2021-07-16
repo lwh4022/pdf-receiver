@@ -2,6 +2,8 @@ package app.handler;
 
 import app.models.resp.GCSEvent;
 import app.models.resp.ResponseTemplate;
+import app.services.DocumentProcessing;
+import app.services.ProcessingCommander;
 import app.utils.GCSUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.cloud.storage.Blob;
@@ -16,22 +18,18 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import java.io.InvalidClassException;
 import java.nio.file.Paths;
 
 @RestController
 @Slf4j
 public class WebHandler {
 
-    @Resource(name="projectId")
-    private String projectId;
-
-    @Autowired
-    private GCSUtils gcsUtils;
-
     @RequestMapping(value="/receivePDF", method = {RequestMethod.POST})
-    public ResponseTemplate receivePdf(@RequestBody final GCSEvent event) throws JsonProcessingException {
+    public ResponseTemplate receivePdf(@RequestBody final GCSEvent event) throws JsonProcessingException, InvalidClassException {
         log.info(event.toJsonString());
-        gcsUtils.getObject(projectId, event.getBucket(), event.getName(), "test.png");
+        ProcessingCommander commander = new ProcessingCommander(new DocumentProcessing());
+        commander.process(event);
         return new ResponseTemplate(ResponseTemplate.RESP_STATUS.OK, "");
     }
 

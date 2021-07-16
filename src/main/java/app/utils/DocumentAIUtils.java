@@ -51,7 +51,6 @@ public class DocumentAIUtils {
 
         ObjectMapper mapper = new ObjectMapper();
         mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
-        mapper.
         log.info(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(documentResponse.getTextStylesList()));
         log.info("=========================================================");
         log.info("=========================================================");
